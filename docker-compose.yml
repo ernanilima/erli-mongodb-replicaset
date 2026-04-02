@@ -1,0 +1,61 @@
+services:
+  mongodb-principal:
+    image: mongo:7
+    container_name: mongodb-principal
+    restart: unless-stopped
+    command: [ "mongod", "--replSet", "rs0", "--bind_ip_all" ]
+    ports:
+      - "27010:27017"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  mongodb-filho-1:
+    image: mongo:7
+    container_name: mongodb-filho-1
+    restart: unless-stopped
+    command: [ "mongod", "--replSet", "rs0", "--bind_ip_all" ]
+    ports:
+      - "27021:27017"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  mongodb-filho-2:
+    image: mongo:7
+    container_name: mongodb-filho-2
+    restart: unless-stopped
+    command: [ "mongod", "--replSet", "rs0", "--bind_ip_all" ]
+    ports:
+      - "27022:27017"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  mongo-rs-init:
+    image: mongo:7
+    container_name: mongo-rs-init
+    depends_on:
+      - mongodb-principal
+      - mongodb-filho-1
+      - mongodb-filho-2
+    restart: "no"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint: [ "/bin/bash", "-c" ]
+    command: >
+      "
+      sleep 15;
+      mongosh --host host.docker.internal --port 27010 --eval '
+        try {
+          rs.status();
+          print(\"Replica set ja inicializado\");
+        } catch (e) {
+          rs.initiate({
+            _id: \"rs0\",
+            members: [
+              { _id: 0, host: \"host.docker.internal:27010\", priority: 10, votes: 1 },
+              { _id: 1, host: \"host.docker.internal:27021\", priority: 0, votes: 0 },
+              { _id: 2, host: \"host.docker.internal:27022\", priority: 0, votes: 0 }
+            ]
+          });
+        }
+      ';
+      "
