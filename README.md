@@ -92,3 +92,13 @@ Este projeto demonstra:
 ---
 
 Se precisar evoluir para produção (auth, keyfile, cluster real), adaptar configuração.
+
+---
+
+## Documentações importantes
+
+[Read Preference](https://www.mongodb.com/pt-br/docs/manual/core/read-preference)
+
+[Write Concern](https://www.mongodb.com/pt-br/docs/manual/reference/write-concern)
+
+[Replication](https://www.mongodb.com/pt-br/docs/manual/replication)
